@@ -16,6 +16,15 @@ External dependencies are loaded via CDN inside the `<head>`:
 
 PWA wiring: the `manifest.json` is embedded inline as a `data:` URL on the `<link rel="manifest">` tag — keep it that way to preserve the single-file constraint.
 
+### Aesthetic — "Carnet" (editorial logbook)
+
+This is a personal app, not a commercial dashboard. The visual direction is intentional and should not regress to generic fitness-app aesthetics.
+
+- **Fonts (Google Fonts CDN)**: Instrument Serif (italic) for hero numbers, city names, headings; Hanken Grotesk for body; JetBrains Mono for tiny uppercase labels and data. **Do not** use Inter, Roboto, system-ui as primary.
+- **Palette**: warm cream paper (`--bg #f4efe3`) + warm ink (`--text #1f1a14`). Refined earth-tone accents: deep emerald (Tetouan), terracotta (Casablanca), crimson (alarm), slate-blue (water). **Do not** use flat saturated `#10b981` / `#ef4444` etc.
+- **Patterns to keep**: numbered meal cards (CSS counter `decimal-leading-zero`), Roman-numeral physio (CSS counter `upper-roman`), hairline `1px` rules instead of card shadows, `body::before` SVG noise overlay for paper grain, `.hunger-fab` styled as a small "faim?" pill (not a pulsing red FAB), display-serif italic for big numeric values (weight delta, streak count, macro values).
+- **Charts**: read colors via `cv('--token')` helper that calls `getComputedStyle`. Hardcoding hex re-introduces the generic look and breaks dark mode.
+
 ### Code layout inside `index.html`
 
 1. **`<style>` block** — CSS variables drive theming. Two color systems live side-by-side:
