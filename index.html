@@ -324,6 +324,25 @@
 
   /* ====== MEALS ====== */
   #today-meals { counter-reset: meal; }
+  /* Ingredient alternative hint */
+  .ing-list li { margin-bottom: 4px; }
+  .ing-alt { font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+    letter-spacing: 0.04em; margin-top: 2px; opacity: 0.85; }
+  /* Swap picker rows */
+  .swap-row { display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .swap-row:last-child { border-bottom: 0; }
+  .swap-row-main { flex: 1; min-width: 0; }
+  .swap-row-name { font-size: 14.5px; font-weight: 500; margin-bottom: 4px; line-height: 1.25; }
+  .swap-row-macros { display: flex; gap: 0; margin-bottom: 3px; }
+  .swap-delta { font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 0.04em; }
+  .swap-row .btn { padding: 7px 12px; font-size: 12.5px; flex-shrink: 0; }
+  /* Swapped indicator on today meal */
+  .meal.swapped .meal-type::after {
+    content: '· remplacé'; margin-left: 6px; font-style: italic;
+    text-transform: lowercase; letter-spacing: 0.04em; color: var(--orange);
+  }
   .meal {
     background: transparent;
     border: 0;
@@ -1210,6 +1229,15 @@
   </div>
 </div>
 
+<!-- Swap picker modal -->
+<div class="modal-overlay" id="swap-modal">
+  <div class="modal">
+    <div class="close-handle"></div>
+    <div id="swap-content"></div>
+    <button class="btn full secondary" style="margin-top:10px;" id="swap-close">Annuler</button>
+  </div>
+</div>
+
 <!-- Settings modal -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
@@ -1546,6 +1574,100 @@ function getTodayPlan() {
   }
   return MEAL_DB.daily_plans.tetouan[(dow + 6) % 7];
 }
+
+/* ============================================================
+ * Smart swap — meal substitution + ingredient hints
+ * ============================================================ */
+const CATEGORY_BY_TYPE = {
+  breakfast: ['breakfasts_tetouan','breakfasts_casablanca'],
+  snack:     ['snacks'],
+  lunch:     ['lunches_tetouan','lunches_casablanca'],
+  dinner:    ['dinners_tetouan','dinners_casablanca']
+};
+
+function macroDistance(a, b) {
+  return Math.abs(a.kcal - b.kcal) * 0.10
+       + Math.abs(a.p    - b.p)    * 1.50
+       + Math.abs(a.g    - b.g)    * 0.50
+       + Math.abs(a.l    - b.l)    * 1.00;
+}
+
+function getSwapCandidates(currentId, type, mode) {
+  const current = MEAL_INDEX[currentId]; if (!current) return [];
+  const cats = CATEGORY_BY_TYPE[type] || [];
+  let pool = [];
+  cats.forEach(c => { pool = pool.concat(MEAL_DB.meals[c] || []); });
+  return pool
+    .filter(m => m.id !== currentId)
+    .filter(m => !m.where || m.where.includes(mode))
+    .map(m => ({ meal:m, d:macroDistance(current, m) }))
+    .sort((a,b) => a.d - b.d)
+    .slice(0, 6);
+}
+
+function applySwap(type, mealId) {
+  const tk = todayKey();
+  if (!state.swaps[tk]) state.swaps[tk] = {};
+  state.swaps[tk][type] = mealId;
+  saveState();
+}
+function clearSwap(type) {
+  const tk = todayKey();
+  if (state.swaps[tk]) { delete state.swaps[tk][type]; saveState(); }
+}
+
+/* Ingredient substitution dictionary — pantry-friendly equivalents */
+const INGR_SWAPS = {
+  // fruits
+  "pomme":["banane","poire","orange"],
+  "banane":["pomme","poire"],
+  "datte":["raisin sec","figue sèche","abricot sec"],
+  // dairy
+  "perly":["fromage blanc 0%","yaourt grec nature","skyr"],
+  "ricotta":["fromage blanc épais","cottage cheese","fromage frais"],
+  "mozzarella":["feta","fromage blanc","ricotta"],
+  "kroon":["edam","gouda jeune","emmental"],
+  "fromage fondu":["kiri","vache qui rit","portion de feta"],
+  "kiri":["fromage fondu Milky","vache qui rit"],
+  // nuts
+  "cajou":["amandes","pistaches","noix"],
+  "amande":["cajou","pistaches","noix"],
+  "pistache":["amandes","cajou","noix"],
+  "noix":["amandes","cajou","pistaches"],
+  // proteins
+  "blanc de poulet":["dinde","escalope de dinde","3 blancs d'œufs"],
+  "cuisse de poulet":["blanc de poulet (200g)","dinde"],
+  "ailes de poulet":["blanc de poulet","cuisse de poulet"],
+  "kefta":["dinde hachée 5%","poulet haché","steak haché 5%"],
+  "thon":["sardines","maquereau","saumon en boîte"],
+  "saucisse":["blanc de poulet émincé","jambon de dinde","kefta"],
+  "œuf":["2 blancs d'œufs (par œuf entier)","tofu nature"],
+  // carbs
+  "riz blanc":["quinoa","riz complet","boulgour"],
+  "riz jaune":["riz basmati + curcuma","quinoa + curcuma"],
+  "pâtes complètes":["quinoa","riz complet","boulgour"],
+  "pain complet":["pain de seigle","tortilla complète","pain aux céréales"],
+  "msemmen":["pain de mie complet","2 toasts complets"],
+  "pain shawarma":["pain pita complet","tortilla complète"],
+  "patate douce":["pomme de terre","courge butternut"],
+  "avoine":["muesli sans sucre","quinoa flocons"],
+  // veggies
+  "courgette":["aubergine","haricots verts","brocoli"],
+  "poivron":["tomate","champignons","aubergine"],
+  "haricots verts":["brocoli","courgette","épinards"],
+  "carotte":["poivron","tomate","betterave"],
+  "tomate":["poivron","concombre"],
+  // fats
+  "avocat":["10 olives + 1 c.c. huile","1 c.s. beurre de cacahuète sans sucre"],
+  "huile d'olive":["huile de colza","huile de noix"]
+};
+
+function ingrAlternatives(name) {
+  const k = name.toLowerCase();
+  for (const key in INGR_SWAPS) if (k.includes(key)) return INGR_SWAPS[key];
+  return null;
+}
+
 const PHYSIO_EXERCISES = [
   { id:'pelvic_tilt', name:"Bascule du bassin", reps:"15 reps", detail:"Allongé sur le dos, genoux pliés, pieds à plat. Aplatis le bas du dos contre le sol en contractant les abdos. Tiens 3 secondes, relâche. Mouvement doux, sans à-coups." },
   { id:'glute_bridge', name:"Pont fessier", reps:"3 × 15 reps", detail:"Allongé sur le dos, genoux pliés. Soulève les hanches en serrant les fessiers, sans cambrer. Le corps forme une ligne droite épaules-genoux. Descends lentement." },
@@ -1576,7 +1698,8 @@ const defaultState = () => ({
   weight: [],
   physio: {},
   sleep: {},
-  photos: {}
+  photos: {},
+  swaps: {}     // 'YYYY-MM-DD': { breakfast:'TB05', snack:'S07', ... }
 });
 
 let state = defaultState();
@@ -1641,11 +1764,17 @@ function getTodayMode() {
 }
 function getMealsForToday() {
   const plan = getTodayPlan();
+  const tk = todayKey();
+  const swaps = state.swaps[tk] || {};
   const out = { breakfast:null, snack:null, lunch:null, dinner:null };
   plan.repas.forEach(r => {
     const k = TYPE_KEY[r.type] || r.type;
-    const meal = MEAL_INDEX[r.id];
-    if (meal) out[k] = Object.assign({}, meal, { _heure:r.heure, _context:r.context });
+    const swapId = swaps[k];
+    const meal = swapId ? MEAL_INDEX[swapId] : MEAL_INDEX[r.id];
+    if (meal) out[k] = Object.assign({}, meal, {
+      _heure: r.heure, _context: r.context,
+      _swapped: !!swapId, _originalId: r.id, _type: k
+    });
   });
   return out;
 }
@@ -1708,7 +1837,7 @@ function renderToday() {
     const checked = mealState[m.key];
     const heure = meal._heure ? `<span class="meal-time">${meal._heure}</span>` : '';
     return `
-      <div class="meal ${checked ? 'completed':''}" data-meal-key="${m.key}">
+      <div class="meal ${checked ? 'completed':''} ${meal._swapped ? 'swapped':''}" data-meal-key="${m.key}">
         <div class="meal-icon"><i data-lucide="${m.icon}"></i></div>
         <div class="meal-body">
           <div class="meal-type">${m.label} ${heure}</div>
@@ -1847,10 +1976,14 @@ function openRecipe(meal, title) {
   if (meal.faim_score) tags.push(`<span class="pill green">faim ${meal.faim_score}/10</span>`);
   if (meal.anti_inflam) tags.push(`<span class="pill orange">anti-inflam ${meal.anti_inflam}/5</span>`);
   if (meal.lieu) tags.push(`<span class="pill blue">${meal.lieu}</span>`);
+  if (meal._swapped) tags.push(`<span class="pill red">remplacé</span>`);
 
-  const ingHtml = (meal.ingredients || []).map(i =>
-    typeof i === 'string' ? `<li>${i}</li>` : `<li><strong>${i.qte}</strong> — ${i.nom}</li>`
-  ).join('');
+  const ingHtml = (meal.ingredients || []).map(i => {
+    const txt = typeof i === 'string' ? i : `<strong>${i.qte}</strong> — ${i.nom}`;
+    const alts = ingrAlternatives(typeof i === 'string' ? i : i.nom);
+    const altHtml = alts ? `<div class="ing-alt">≈ ${alts.join(' · ')}</div>` : '';
+    return `<li>${txt}${altHtml}</li>`;
+  }).join('');
 
   const sections = [];
   if (meal.portions) {
@@ -1888,6 +2021,20 @@ function openRecipe(meal, title) {
     sections.push(`<div style="margin-top:10px;padding:10px;border:1px dashed var(--border);font-size:13px;color:var(--muted);line-height:1.5;">💡 ${meal._context}</div>`);
   }
 
+  // Swap button only for meals tied to today's slot (have _type)
+  let swapBtn = '';
+  if (meal._type) {
+    swapBtn = meal._swapped
+      ? `<button class="btn full secondary" id="swap-undo-btn" style="margin-top:10px;">
+           <i data-lucide="rotate-ccw" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></i>
+           Revenir au repas d'origine
+         </button>`
+      : `<button class="btn full secondary" id="swap-open-btn" style="margin-top:10px;">
+           <i data-lucide="repeat" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></i>
+           Remplacer ce repas (mêmes macros)
+         </button>`;
+  }
+
   $('#recipe-content').innerHTML = `
     <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--muted);margin-bottom:4px;">${title}</div>
     <h3 style="margin-bottom:10px;">${meal.nom}</h3>
@@ -1899,9 +2046,67 @@ function openRecipe(meal, title) {
     </div>
     <div class="macros-row" style="margin-bottom:14px;">${tags.join('')}</div>
     <div class="section-title"><i data-lucide="list"></i> Ingrédients</div>
-    <ul style="padding-left:20px;line-height:1.7;font-size:13.5px;margin-bottom:14px;">${ingHtml}</ul>
-    ${sections.join('')}`;
+    <ul style="padding-left:20px;line-height:1.7;font-size:13.5px;margin-bottom:14px;" class="ing-list">${ingHtml}</ul>
+    ${sections.join('')}
+    ${swapBtn}`;
+
+  if (meal._type) {
+    const undoEl = $('#swap-undo-btn');
+    const openEl = $('#swap-open-btn');
+    if (undoEl) undoEl.addEventListener('click', () => {
+      clearSwap(meal._type);
+      $('#recipe-modal').classList.remove('show');
+      renderToday(); renderNutrition();
+      showToast("Repas restauré");
+    });
+    if (openEl) openEl.addEventListener('click', () => {
+      openSwapPicker(meal._type, meal._swapped ? meal._originalId : meal.id, meal);
+    });
+  }
+
   $('#recipe-modal').classList.add('show');
+  refreshIcons();
+}
+
+function openSwapPicker(type, currentId, originalMeal) {
+  const mode = getTodayMode();
+  const candidates = getSwapCandidates(currentId, type, mode);
+  const ref = MEAL_INDEX[currentId];
+  const rows = candidates.map(({meal:m, d}) => {
+    const dk = m.kcal - ref.kcal, dp = m.p - ref.p, dg = m.g - ref.g, dl = m.l - ref.l;
+    const fmt = (n,suffix) => (n>=0?'+':'') + n + suffix;
+    return `
+      <div class="swap-row" data-id="${m.id}">
+        <div class="swap-row-main">
+          <div class="swap-row-name">${m.nom}</div>
+          <div class="swap-row-macros">
+            <span class="pill">${m.kcal} kcal</span>
+            <span class="pill green">${m.p}g prot</span>
+            <span class="pill orange">${m.g}g gluc</span>
+            <span class="pill blue">${m.l}g lip</span>
+          </div>
+          <div class="swap-delta">Δ ${fmt(dk,' kcal')} · ${fmt(dp,'g prot')} · ${fmt(dg,'g gluc')} · ${fmt(dl,'g lip')}</div>
+        </div>
+        <button class="btn" data-pick="${m.id}">Choisir</button>
+      </div>`;
+  }).join('');
+
+  $('#swap-content').innerHTML = `
+    <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--muted);margin-bottom:4px;">${TYPE_LABEL[type]} · Remplacer</div>
+    <h3 style="margin-bottom:6px;">Alternatives à ${ref.nom}</h3>
+    <p class="muted" style="font-size:12.5px;margin-bottom:14px;">Classées par proximité de macros. Δ = écart par rapport à l'original.</p>
+    ${rows || '<div class="empty">Aucune alternative dans cette catégorie.</div>'}`;
+  $('#swap-modal').classList.add('show');
+
+  $$('#swap-content [data-pick]').forEach(b => {
+    b.addEventListener('click', () => {
+      applySwap(type, b.dataset.pick);
+      $('#swap-modal').classList.remove('show');
+      $('#recipe-modal').classList.remove('show');
+      renderToday(); renderNutrition();
+      showToast("Repas remplacé ✓");
+    });
+  });
   refreshIcons();
 }
 
@@ -2354,6 +2559,7 @@ function wire() {
   });
   $('#hunger-close').addEventListener('click', () => $('#hunger-modal').classList.remove('show'));
   $('#recipe-close').addEventListener('click', () => $('#recipe-modal').classList.remove('show'));
+  $('#swap-close').addEventListener('click', () => $('#swap-modal').classList.remove('show'));
   $$('.modal-overlay').forEach(ov => {
     ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show'); });
   });
