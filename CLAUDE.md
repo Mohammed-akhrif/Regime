@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Personal health-tracking PWA for a male user (30, 1.70m, 93kg → 78kg goal) with an L5-S1 disc herniation (no gym, no running — physiotherapy + walking only) who travels weekly between **Tetouan** (4 days, home-cooked meals) and **Casablanca** (3 days, fast-food survival). UI is in **French**.
+Personal health-tracking PWA for a male user (30, 1.70m, 95kg → 80kg goal) with an L5-S1 disc herniation (no gym, no running — physiotherapy + walking only) who travels weekly between **Tetouan** (home-cooked meals) and **Casablanca** (4 days, snack-bar + minimal home cooking). UI is in **French**.
 
 ## Architecture
 
@@ -35,15 +35,15 @@ This is a personal app, not a commercial dashboard. The visual direction is inte
 
 3. **`<script>` block** — organized as:
    - **State & persistence** — a single `state` object mirrored to `localStorage` under one root key. All reads go through `loadState()` / writes through `saveState()`; never touch `localStorage` directly from feature code or you will desync the in-memory copy.
-   - **Static data** — `MEALS_TETOUAN` and `MEALS_CASABLANCA` (7-day arrays, each entry has `breakfast`, `snack`, `lunch`, `dinner` with `name`, `ingredients`, `protein`, `calories`, `carbs`, `fat`).
-   - **Mode resolution** — `getTodayMode()` reads `state.settings.casablancaDays` (array of weekday indices, 0=Sunday) and returns `'tetouan' | 'casablanca'`. The travel-mode toggle at the top of the screen overrides this for the current day only.
+   - **Static data — `MEAL_DB`** — id-keyed meal catalogue (`TB*`, `CB*`, `TL*`, `CL*`, `S*`, `TD*`, `CD*`) under `meals.{breakfasts,lunches,snacks,dinners}_{tetouan,casablanca}` + `daily_plans.tetouan` (7 plans, one per weekday) and `daily_plans.casablanca` (4 plans for arrival→return). `MEAL_INDEX` is a flat id→meal lookup built at boot. Each meal uses condensed keys: `kcal`, `p` (protein), `g` (glucides), `l` (lipides), `f` (fibres), plus optional `prep[]`, `commande`, `strategie[]`, `portions{}`, `lieu`, `boost`, `achat`, `note`, `temps_min`, `faim_score`, `anti_inflam`.
+   - **Mode resolution** — `getTodayMode()` reads `state.settings.casablancaDays` (default `[1,2,3,4]` = Mon–Thu) and returns `'tetouan' | 'casablanca'`. `getTodayPlan()` resolves which `daily_plans` entry applies today; `getMealsForToday()` maps the plan's `repas[]` (with French type names `petit_dejeuner|dejeuner|snack|diner`) to the internal keys `breakfast|lunch|snack|dinner` via `TYPE_KEY`. The travel-mode toggle overrides mode for the current day only.
    - **Per-tab `render*()` functions** — each tab has its own render function that rebuilds its DOM from `state`. After any state mutation, call the affected tab's render function (and `lucide.createIcons()` if new icons were inserted).
    - **Chart instances** — Chart.js instances are stored on a `charts` object and **destroyed before re-render** (`charts.weight?.destroy()`); skipping this leaks canvases and breaks tooltips.
    - **Notifications** — `Notification.requestPermission()` is called on first interaction (not on load — Chrome blocks it). Reminders at 08:00, 13:00, 21:00 are scheduled with `setTimeout` chains computed from `Date.now()`.
 
 ### Key invariants
 
-- **Targets are constants**: 1800 kcal, 150g protein, 170g carbs, 65g fat, 10 glasses water, 30 min walking. Goal weight 78kg, start weight 93kg (15kg goal). If these change, search for the literal numbers — they are referenced both in the targets object and in chart axis configs.
+- **Default targets**: 1800 kcal, 175g protein, 145g carbs, 60g fat, 10 glasses water, 30 min walking. Goal weight 80kg, start weight 95kg (15kg goal). Defaults live in `DEFAULT_TARGETS`; the live `TARGETS` object is overridden from user settings (editable in the Settings modal), so when referencing targets in code, use `TARGETS.foo` rather than the literal constant.
 - **Streaks** (plan streak in Progress, physio streak in Physio) are computed from a date-keyed log, not from a counter. Resetting requires clearing the log entries, not zeroing a number.
 - **Nutrition tab macros are derived**, not stored — they sum the macros of meals checked off in Today for the current date. Don't add a separate "logged macros" store; compute from the meal-completion log.
 - **Photos** are stored as base64 data URLs in localStorage. Cap at one per ISO week (`YYYY-Www` key) and warn if total localStorage usage gets close to the ~5MB browser quota.

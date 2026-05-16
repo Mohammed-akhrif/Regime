@@ -1280,802 +1280,272 @@
  * ============================================================ */
 const DAYS_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 
-const MEALS_TETOUAN = [
-  {
-    "breakfast": {
-      "name": "Omelette Mozzarella Champignons",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Blancs oeuf 2 un.",
-        "Mozzarella Milky Food 40g",
-        "Champignons frais 150g",
-        "Tomate 150g",
-        "Pain mie complet 1 tr.",
-        "Huile olive 0.5 tsp"
-      ],
-      "protein": 36,
-      "calories": 452,
-      "carbs": 20,
-      "fat": 24
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Salade Nicoise Thon Oeuf Pates Completes",
-      "ingredients": [
-        "Thon boite eau 80g 2 un.",
-        "Oeufs durs 3 un.",
-        "Pates completes crues 60g",
-        "Mais boite 50g",
-        "Laitue 80g",
-        "Tomate 100g",
-        "Huile olive 1 tsp",
-        "Moutarde + vinaigre + sel 10g"
-      ],
-      "protein": 58,
-      "calories": 568,
-      "carbs": 42,
-      "fat": 16
-    },
-    "dinner": {
-      "name": "Omelette Geante 5 Oeufs Legumes + Fromage",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Blancs oeuf 3 un.",
-        "Kroon rouge 40g",
-        "Champignons 150g",
-        "Poivron 100g",
-        "Courgette rapee 100g",
-        "Huile olive 0.5 tsp"
-      ],
-      "protein": 42,
-      "calories": 542,
-      "carbs": 14,
-      "fat": 30
-    }
+/* ============================================================
+ * Meal database v3 — id-keyed meals + per-day plan rotation
+ * ============================================================ */
+const MEAL_DB = {
+  visual_portions: {
+    viande_100g: "= 1 paume de main",
+    viande_150g: "= 1.5 paume",
+    viande_200g: "= 2 paumes",
+    riz_cuit: "1 poing fermé ≈ 150g cuit",
+    pain: "1 msemmen ≈ 120g · 1 toast ≈ 25g",
+    fromage: "1 tranche fine ≈ 25-30g",
+    huile: "1 cuillère café rase = 5ml",
+    kefta: "1 boulette taille golf ≈ 35g",
+    oeuf: "compter à l'unité (1 œuf = 55g)"
   },
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake + Pomme",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Eau fraiche 300ml",
-        "Pomme 150g"
-      ],
-      "protein": 25,
-      "calories": 198,
-      "carbs": 21,
-      "fat": 2
-    },
-    "lunch": {
-      "name": "Poulet Grille Riz + Grande Salade",
-      "ingredients": [
-        "Blanc poulet cru 220g",
-        "Riz blanc cru 55g",
-        "Laitue 100g",
-        "Tomate 150g",
-        "Concombre 100g",
-        "Huile olive 1 tsp",
-        "Cumin + paprika + ail + sel 5g"
-      ],
-      "protein": 55,
-      "calories": 575,
-      "carbs": 46,
-      "fat": 14
-    },
-    "dinner": {
-      "name": "Kefta Boeuf Four + Legumes Rotis + Patate Douce",
-      "ingredients": [
-        "Kefta boeuf 10pct 180g",
-        "Patate douce 180g",
-        "Courgette 200g",
-        "Poivron rouge 150g",
-        "Oignon 100g",
-        "Huile olive 1 tsp",
-        "Curcuma + cumin + coriandre + poivre noir 6g"
-      ],
-      "protein": 44,
-      "calories": 553,
-      "carbs": 40,
-      "fat": 22
-    }
+  meals: {
+    breakfasts_tetouan: [
+      {id:"TB01",nom:"Omelette mozzarella poivron + toast",kcal:452,p:34,g:26,l:23,f:4,temps_min:12,faim_score:9,anti_inflam:3,
+       ingredients:[{nom:"Œufs entiers",qte:"3 œufs"},{nom:"Mozzarella Milky Food",qte:"35g"},{nom:"Poivron rouge",qte:"100g"},{nom:"Toast complet",qte:"2 tranches (50g)"},{nom:"Tomate",qte:"100g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Couper poivron en petits dés. Faire revenir dans poêle huilée 3 min feu moyen","Battre 3 œufs + sel + poivre. Verser sur les poivrons","Cuire feu doux 2 min, déposer mozzarella déchirée sur une moitié","Plier l'omelette, couvrir 1 min pour fondre","Servir avec toast grillé + tomate tranchée"],
+       note:"Mozzarella fond et donne une texture crémeuse sans ajout de gras. Poivron = vitamine C qui améliore l'absorption du fer des œufs."},
+      {id:"TB02",nom:"Avocat toast + 2 œufs pochés",kcal:448,p:24,g:28,l:26,f:9,temps_min:12,faim_score:9,anti_inflam:5,
+       ingredients:[{nom:"Avocat",qte:"1/2 (80g)"},{nom:"Œufs pochés",qte:"2 œufs"},{nom:"Toast complet",qte:"2 tranches (50g)"},{nom:"Tomate",qte:"150g"},{nom:"Perly 0%",qte:"1 pot (125g)"}],
+       prep:["Écraser l'avocat sur les 2 toasts + sel + citron + paprika","Casserole eau + filet vinaigre à frémissement","Créer un tourbillon, casser chaque œuf dans un ramequin, verser doucement","Cuire 3-4 min. Poser sur l'avocat toast","Servir le Perly à côté comme yaourt nature"],
+       note:"Avocat = meilleures graisses anti-inflammatoires pour L5-S1. Ce petit-déjeuner tient 5h sans fringale."},
+      {id:"TB03",nom:"Oats banane yaourt",kcal:458,p:26,g:70,l:7,f:8,temps_min:7,faim_score:8,anti_inflam:2,
+       ingredients:[{nom:"Flocons d'avoine",qte:"55g"},{nom:"Lait demi-écrémé",qte:"200ml"},{nom:"Banane",qte:"1 (100g)"},{nom:"Perly 0%",qte:"2 pots (250g)"},{nom:"Cannelle",qte:"1g"}],
+       prep:["Chauffer le lait dans une casserole. Ajouter oats + cannelle","Remuer 3-4 min jusqu'à crémeux","Verser dans bol, couper la banane en rondelles dessus","Perly servi à côté en 2 pots ou mélangé"],
+       note:"2 Perly 0% = 14g de protéines ajoutées. Cannelle = régule la glycémie, réduit le pic post-repas et la fringale de 11h."},
+      {id:"TB04",nom:"3 œufs Kroon + avocat + café",kcal:471,p:28,g:9,l:34,f:8,temps_min:10,faim_score:9,anti_inflam:4,tags:["low_carb","grasses_saines"],
+       ingredients:[{nom:"Œufs brouillés",qte:"3 œufs"},{nom:"Kroon rouge",qte:"30g (1 tranche)"},{nom:"Avocat",qte:"1/2 (80g)"},{nom:"Huile d'olive",qte:"1/2 c.c."}],
+       prep:["Battre œufs + sel + poivre","Poêle antiadhésive feu doux, 1/2 c.c. d'huile","Cuire œufs brouillés 3 min en remuant doucement","Couper Kroon en dés, intégrer à la fin pour fondre légèrement","Servir avec 1/2 avocat tranché + citron + sel"],
+       note:"Option low-carb. Bon pour les jours où tu bouges peu. Avocat + œufs + Kroon = graisses saines + protéines = satiété 5-6h garantie."},
+      {id:"TB05",nom:"Pancakes avoine banane + Perly",kcal:460,p:28,g:64,l:11,f:7,temps_min:18,faim_score:10,anti_inflam:2,tags:["plaisir","sans_sucre_ajoute","weekend"],
+       ingredients:[{nom:"Flocons d'avoine",qte:"55g"},{nom:"Œufs",qte:"2 œufs"},{nom:"Banane bien mûre",qte:"100g"},{nom:"Perly 0%",qte:"2 pots (250g)"},{nom:"Cannelle + sel",qte:"2g"}],
+       prep:["Écraser la banane très mûre en purée lisse","Ajouter 2 œufs, battre ensemble","Intégrer oats + cannelle + sel. Pâte épaisse = normal","Poêle antiadhésive feu MOYEN-DOUX, sans huile","Petits disques 8cm, cuire 3 min par face","Servir avec Perly en guise de crème"],
+       note:"Zéro sucre ajouté. Banane mûre = sucrant naturel. Remplace brownie ou msemmen beurré du week-end."},
+      {id:"TB06",nom:"Oats ricotta pomme miel",kcal:478,p:21,g:68,l:13,f:8,temps_min:8,faim_score:9,anti_inflam:2,
+       ingredients:[{nom:"Flocons d'avoine",qte:"55g"},{nom:"Lait demi-écrémé",qte:"150ml"},{nom:"Ricotta Milky Food",qte:"60g"},{nom:"Pomme",qte:"1 (150g)"},{nom:"Miel",qte:"1 c.c. (7g)"}],
+       prep:["Cuire oats dans lait + 100ml eau, 3-4 min","Retirer du feu, tiédir 1 min","Intégrer ricotta et remuer → texture ultra crémeuse","Couper la pomme en lamelles, déposer dessus + miel"],
+       note:"Ricotta = caséine = protéine à digestion lente 5-6h. Le plus anti-fringale de la liste."},
+      {id:"TB07",nom:"Œufs frits + haricots verts + fromage fondu + toast",kcal:455,p:29,g:28,l:25,f:5,temps_min:15,faim_score:8,anti_inflam:2,
+       ingredients:[{nom:"Œufs",qte:"3 œufs"},{nom:"Haricots verts",qte:"150g"},{nom:"Fromage fondu Milky",qte:"1 portion (20g)"},{nom:"Toast complet",qte:"2 tranches (50g)"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Cuire haricots verts dans eau bouillante 6 min, égoutter, assaisonner sel + ail","Frire 3 œufs dans poêle avec 1 c.c. d'huile","Tartiner fromage fondu sur toast grillé chaud (il fond légèrement)","Dresser haricots verts + œufs + toast fromage"],
+       note:"Haricots verts = fibres + magnésium = anti-crampes musculaires. Bon pour la récupération du dos L5-S1."}
+    ],
+    breakfasts_casablanca: [
+      {id:"CB01",nom:"Msemmen complet + 2 œufs bouillis + café",lieu:"Moul msemmen",kcal:404,p:20,g:47,l:17,f:4,temps_min:5,faim_score:7,
+       portions:{msemmen:"1 pièce standard",oeufs:"2 œufs dans leur coquille"},
+       ingredients:[{nom:"Msemmen blé complet",qte:"1 pièce (120g)"},{nom:"Œufs bouillis",qte:"2 œufs"},{nom:"Café noir sans sucre",qte:"1 tasse"}],
+       commande:"Msemmen complet + 2 œufs beyd messlouk + café hlib bla sukkar",
+       boost:"Si dispo : 1 Kiri de la maqshda voisine = +42 kcal, +2g de protéines",
+       note:"Protéines modérées. Préférer msemmen complet (fibres > msemmen normal)."},
+      {id:"CB02",nom:"3 œufs bouillis + fromage rouge + café",lieu:"Moul msemmen + maqshda",kcal:396,p:29,g:2,l:30,f:0,temps_min:5,faim_score:9,tags:["haute_proteine","low_carb","meilleur_choix_matin"],
+       portions:{oeufs:"3 œufs dans coquille",fromage:"2 tranches fines (épaisseur ~3mm)"},
+       ingredients:[{nom:"Œufs bouillis",qte:"3 œufs"},{nom:"Kroon rouge (maqshda)",qte:"2 tranches ~40g"},{nom:"Café noir sans sucre",qte:"1 tasse"}],
+       commande:"3 œufs beyd messlouk chez moul msemmen + 2 tranches fromage rouge chez maqshda",
+       note:"MEILLEURE OPTION PROTÉINES LE MATIN. 29g protéines = cadrage optimal pour la journée. Idéal si déjeuner riche en glucides."},
+      {id:"CB03",nom:"Omelette 3 œufs + demi pain + café",lieu:"Moul msemmen",kcal:451,p:25,g:32,l:23,f:2,temps_min:8,faim_score:8,
+       portions:{omelette:"3 œufs visibles dans l'omelette",pain:"1/2 khobz standard (taille poing fermé)"},
+       ingredients:[{nom:"Omelette",qte:"3 œufs + huile cuisson"},{nom:"Pain khobz",qte:"1/2 pain (~80g)"}],
+       commande:"Omelette talata beyd + nos khobz + café bla sukkar",
+       boost:"Demander Kiri à l'intérieur de l'omelette = +42 kcal, +2g",
+       note:"Classique fiable. Préférer cette option si tu as peu de temps le matin."},
+      {id:"CB04",nom:"Msemmen complet + 2 Kiri + 1 œuf bouilli + café",lieu:"Moul msemmen + maqshda",kcal:412,p:18,g:46,l:15,f:4,temps_min:5,faim_score:7,
+       portions:{msemmen:"1 pièce",kiri:"2 petites portions individuelles"},
+       ingredients:[{nom:"Msemmen blé complet",qte:"1 pièce"},{nom:"Kiri",qte:"2 portions (34g)"},{nom:"Œuf bouilli",qte:"1 œuf"},{nom:"Café noir",qte:"1 tasse"}],
+       commande:"Msemmen complet + kiri ijuj + wahid beyd messlouk + café",
+       note:"Option de dépannage. Essayer d'ajouter 1 œuf supplémentaire si possible."}
+    ],
+    lunches_tetouan: [
+      {id:"TL01",nom:"Poulet grillé + riz blanc + grande salade",kcal:553,p:56,g:47,l:14,f:5,temps_min:25,faim_score:9,anti_inflam:3,
+       ingredients:[{nom:"Blanc de poulet",qte:"220g cru"},{nom:"Riz blanc",qte:"55g cru"},{nom:"Laitue",qte:"80g"},{nom:"Tomate",qte:"150g"},{nom:"Concombre",qte:"100g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["POULET : assaisonner cumin + paprika + sel + citron 5 min avant","Poêle feu vif sans huile, cuire 6-7 min par face jusqu'à doré","RIZ : eau bouillante salée 2x volume, feu doux 12 min à couvert","SALADE : laitue + tomate + concombre + huile + sel + citron"],
+       note:"LE repas fondamental du programme. 56g protéines en un repas. Cuire 500g de poulet en batch hebdomadaire pour gagner du temps."},
+      {id:"TL02",nom:"Kefta de bœuf + patate douce + légumes sautés",kcal:558,p:43,g:42,l:22,f:7,temps_min:30,faim_score:10,anti_inflam:4,
+       ingredients:[{nom:"Kefta bœuf 10%",qte:"180g"},{nom:"Patate douce",qte:"200g"},{nom:"Courgette",qte:"150g"},{nom:"Poivron rouge",qte:"100g"},{nom:"Huile d'olive",qte:"1 c.c."},{nom:"Curcuma + cumin + poivre noir",qte:"5g"}],
+       prep:["PATATE DOUCE : couper en cubes, vapeur 15 min ou micro-ondes 7 min","KEFTA : mélanger avec oignon râpé + cumin + sel + coriandre, former boulettes","Cuire poêle sans huile feu moyen, 5-6 min par face","LÉGUMES : sauter dans la même poêle avec 1 c.c. d'huile + curcuma + poivre noir 4 min","CURCUMA OBLIGATOIRE + POIVRE NOIR : synergique pour L5-S1"],
+       note:"Curcuma + poivre noir = combo anti-inflammatoire. Patate douce = glucides lents, pas de pic glycémique."},
+      {id:"TL03",nom:"Salade niçoise maison complète",kcal:562,p:60,g:22,l:16,f:6,temps_min:15,faim_score:9,anti_inflam:4,tags:["haute_proteine_max","rapide"],
+       ingredients:[{nom:"Thon boîte (eau)",qte:"2 boîtes (160g)"},{nom:"Œufs durs",qte:"3 œufs"},{nom:"Haricots verts",qte:"100g"},{nom:"Tomate",qte:"150g"},{nom:"Maïs",qte:"50g"},{nom:"Laitue",qte:"60g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Cuire haricots verts 8 min eau bouillante, refroidir eau froide","Égoutter thon + maïs","Couper œufs durs en quartiers, tomate en dés","Assembler le tout dans un grand bol","Vinaigrette : huile + vinaigre + sel + poivre + moutarde (optionnel)"],
+       note:"60g de protéines = record du programme. Oméga-3 du thon = anti-inflammatoire L5-S1. 15 min."},
+      {id:"TL04",nom:"Pâtes complètes sauce tomate + poulet",kcal:563,p:55,g:54,l:14,f:9,temps_min:30,faim_score:9,anti_inflam:3,
+       ingredients:[{nom:"Blanc de poulet",qte:"200g cru"},{nom:"Pâtes complètes",qte:"60g crues"},{nom:"Tomate (fraîche ou boîte)",qte:"400g"},{nom:"Ail",qte:"2 gousses"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["SAUCE : huile + ail haché 1 min, ajouter tomates + sel + basilic + pincée sucre","Mijoter 15 min jusqu'à épaississement","PÂTES : cuire al dente, égoutter","POULET : griller assaisonné, couper en lamelles","Mélanger pâtes + sauce, dresser le poulet par dessus"],
+       note:"Sauce maison = zéro conservateurs. Pâtes complètes = 2x fibres vs pâtes blanches. Ail quotidien = allicine anti-inflammatoire."},
+      {id:"TL05",nom:"Ailes de poulet au four + riz jaune + salade",kcal:565,p:47,g:42,l:22,f:3,temps_min:40,faim_score:9,anti_inflam:2,tags:["plaisir","four"],
+       ingredients:[{nom:"Ailes de poulet sans peau",qte:"200g"},{nom:"Riz jaune",qte:"50g cru"},{nom:"Salade (laitue + tomate + concombre)",qte:"200g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["AILES : enlever la peau (économise ~100 kcal). Assaisonner : paprika + cumin + sel + ail","Four 200°C, 30-35 min. Retourner à mi-cuisson","RIZ JAUNE : cuire avec curcuma + pincée sel + filet d'huile dans l'eau","SALADE classique vinaigrette légère"],
+       note:"ENLEVER LA PEAU est obligatoire (100 kcal de graisses saturées). Riz jaune au curcuma = anti-inflammatoire L5-S1."},
+      {id:"TL06",nom:"Cuisse de poulet four + haricots verts + carotte",kcal:541,p:55,g:26,l:22,f:6,temps_min:40,faim_score:10,anti_inflam:3,
+       ingredients:[{nom:"Cuisse de poulet sans peau",qte:"250g"},{nom:"Haricots verts",qte:"150g"},{nom:"Carotte",qte:"150g"},{nom:"Perly 0% (sauce)",qte:"1 pot (125g)"},{nom:"Huile d'olive",qte:"1/2 c.c."}],
+       prep:["CUISSE : assaisonner curcuma + paprika + sel + citron + 1/2 c.c. huile","Four 200°C 35 min","LÉGUMES : vapeur 10 min ou sauter à la poêle avec ail + sel","SAUCE : Perly + ail pressé + citron + persil + sel"],
+       note:"55g protéines dans le repas principal. Cuisse plus goûteuse que le blanc. Sauce yaourt = probiotiques + protéines."},
+      {id:"TL07",nom:"Shawarma maison poulet pain complet",kcal:548,p:48,g:50,l:14,f:5,temps_min:20,faim_score:10,anti_inflam:2,tags:["plaisir","fait_maison"],
+       ingredients:[{nom:"Blanc de poulet",qte:"200g cru"},{nom:"Pain shawarma complet",qte:"1/2 pain (50g)"},{nom:"Laitue + tomate + concombre",qte:"150g"},{nom:"Perly (sauce)",qte:"50g"},{nom:"Poivron rouge émincé",qte:"100g"},{nom:"Huile d'olive",qte:"1/2 c.c."}],
+       prep:["POULET : couper en lanières fines, mariner 10 min : cumin + paprika + ail + sel + huile","Poêle feu très vif, cuire lanières 2-3 min par face (vif = croustillant)","SAUCE : Perly + ail + citron + sel + cumin","Pain shawarma : chauffer poêle ou panini (30 sec)","Garnir : sauce + légumes + poulet"],
+       note:"1/2 pain seulement. Shawarma maison = version saine du fast-food. Sauce Perly remplace la sauce blanche grasse."}
+    ],
+    lunches_casablanca: [
+      {id:"CL01",nom:"Salade niçoise standard",lieu:"Snack bar",kcal:545,p:50,g:22,l:17,f:5,faim_score:8,anti_inflam:3,
+       portions:{thon:"2 petites boîtes ou portion restaurant",oeufs:"2 œufs durs en quartiers",legumes:"assiette bien garnie : laitue, tomate, concombre, haricots, maïs"},
+       commande:"Salade niçoise. Demander : sans excès de vinaigrette. Pain complet si dispo.",
+       strategie:["C'est déjà 50g de protéines. Ne pas ajouter de pain en plus","Si pain servi automatiquement : manger 1/2 tranche seulement","Vinaigrette légère, pas de mayo"],
+       note:"Excellente option au snack. Thon + œufs = 2 sources de protéines complètes."},
+      {id:"CL02",nom:"Poulet grillé + légumes sautés",lieu:"Snack bar",kcal:558,p:46,g:36,l:16,f:5,faim_score:9,anti_inflam:3,
+       portions:{poulet:"portion restaurant ≈ 2 paumes",legumes:"assiette creuse de légumes sautés",pain:"1 pain plat accompagnement"},
+       commande:"Poulet grillé + khodra sautée. Demander : sans sauce rouge sucrée si possible.",
+       strategie:["Manger poulet et légumes en priorité","Pain accompagnement : 1 seul, pas plus","Éviter riz pilaf beurré si proposé en alternative"],
+       note:"Meilleur rapport protéines/satisfaction au snack bar."},
+      {id:"CL03",nom:"Sandwich poulet grillé pain complet",lieu:"Snack bar",kcal:510,p:43,g:50,l:12,f:5,faim_score:8,anti_inflam:2,
+       portions:{pain:"1 pain shawarma/tacos complet",poulet:"garniture visible ≈ 1.5 paume"},
+       commande:"Sandwich poulet grillé pain complet. SANS sauce blanche. Avec laitue tomate concombre.",
+       strategie:["REFUSER la sauce blanche = économise 150-200 kcal","Demander sauce tomate ou yaourt nature à la place","Pas de frites en accompagnement"],
+       note:"Sauce blanche seule = 150-200 kcal de graisses vides."},
+      {id:"CL04",nom:"Kefta grillée + salade + pain",lieu:"Snack bar",kcal:535,p:36,g:36,l:20,f:4,faim_score:9,anti_inflam:2,
+       portions:{kefta:"3-4 boulettes ou 2 brochettes",pain:"1 pain accompagnement"},
+       commande:"Kefta + salade. Demander : sauce tomate si dispo, pas de frites.",
+       strategie:["3-4 boulettes = portion correcte","Si brochettes : 2 brochettes = portion midi","Légumes en accompagnement si disponibles"],
+       note:"Kefta grillée (pas frite) = bonne option. Éviter kefta en sauce avec beaucoup d'huile."},
+      {id:"CL05",nom:"Omelette légumes + pain",lieu:"Snack bar",kcal:490,p:26,g:34,l:23,f:4,faim_score:7,anti_inflam:2,
+       portions:{omelette:"3 œufs visibles minimum",pain:"1 pain ou 1/2 khobz"},
+       commande:"Omelette talata beyd + légumes (poivron, tomate, oignon). Pain complet.",
+       strategie:["3 œufs minimum (pas 2)","Si fromage disponible : ajouter = +100 kcal mais +protéines","Option de secours si poulet/thon indisponibles"],
+       note:"Protéines modestes. À utiliser en dernier recours."}
+    ],
+    snacks: [
+      {id:"S01",nom:"Avocat + 2 toasts complets",where:["tetouan"],kcal:252,p:7,g:28,l:14,f:9,temps_min:3,faim_score:7,anti_inflam:5,
+       ingredients:[{nom:"Avocat",qte:"1/2 (80g)"},{nom:"Toast complet",qte:"2 tranches (50g)"}],
+       prep:["Écraser l'avocat sur les toasts + sel + citron + paprika. Manger lentement."],
+       note:"Pour les jours où le déjeuner était riche en protéines. Graisses saines avocat = anti-inflammatoire puissant L5-S1."},
+      {id:"S02",nom:"2 Perly 0% + amandes + miel",where:["tetouan","casablanca"],kcal:215,p:18,g:20,l:10,f:3,temps_min:2,faim_score:9,anti_inflam:2,
+       ingredients:[{nom:"Perly 0%",qte:"2 pots (250g)"},{nom:"Amandes",qte:"15g"},{nom:"Miel",qte:"1 c.c. (7g)"}],
+       prep:["Verser amandes concassées dans le Perly + filet de miel. Manger lentement."],
+       note:"18g protéines = satiété 3h. Miel = sucré naturel qui stoppe le craving brownie/chocolat."},
+      {id:"S03",nom:"Avocat + thon (mini bowl)",where:["tetouan"],kcal:213,p:20,g:9,l:12,f:7,temps_min:3,faim_score:9,anti_inflam:5,tags:["haute_proteine","anti_inflammatoire_max"],
+       ingredients:[{nom:"Avocat",qte:"1/2 (80g)"},{nom:"Thon boîte (eau)",qte:"1 boîte (80g)"},{nom:"Citron + sel",qte:"10g"}],
+       prep:["Égoutter le thon, mélanger dans 1/2 avocat évidé avec citron + sel. Manger à la cuillère."],
+       note:"MEILLEUR SNACK ANTI-INFLAMMATOIRE. Oméga-3 thon + graisses saines avocat = cocktail optimal pour disque L5-S1. 20g protéines = quasi un repas."},
+      {id:"S04",nom:"3 dattes Medjool + amandes + café",where:["tetouan","casablanca"],kcal:210,p:7,g:32,l:10,f:4,temps_min:1,faim_score:8,anti_inflam:2,tags:["anti_cravings_sucre","plaisir"],
+       ingredients:[{nom:"Dattes Medjool",qte:"3 dattes (75g)"},{nom:"Amandes",qte:"15g"},{nom:"Café noir",qte:"1 tasse"}],
+       prep:["Dénoyauter les dattes. Manger alternativement 1 datte puis quelques amandes."],
+       note:"ANTI-CRAVINGS SUCRE. Quand tu veux un brownie : ce snack donne le sucré + satisfaisant + protéines. 95% du temps ça suffit."},
+      {id:"S05",nom:"2 œufs bouillis + fromage fondu",where:["tetouan","casablanca"],kcal:192,p:15,g:4,l:14,f:0,temps_min:1,faim_score:8,anti_inflam:1,tags:["batch_friendly","zero_cuisine"],
+       ingredients:[{nom:"Œufs durs",qte:"2 œufs"},{nom:"Fromage fondu Milky",qte:"1 portion (20g)"}],
+       prep:["Peler les œufs durs préparés en avance. Sel. Manger avec le fromage fondu."],
+       note:"Préparer 6 œufs bouillis le dimanche soir = snacks prêts pour 3 jours."},
+      {id:"S06",nom:"Perly + pomme + cajou",where:["tetouan","casablanca"],kcal:208,p:11,g:30,l:9,f:4,temps_min:2,faim_score:8,anti_inflam:2,
+       ingredients:[{nom:"Perly 0%",qte:"1 pot (125g)"},{nom:"Pomme",qte:"1 (150g)"},{nom:"Cajou",qte:"15g"}],
+       prep:["Couper la pomme en lamelles. Manger avec le Perly + cajou."],
+       note:"Léger et complet. Cajou = cuivre + magnésium bons pour la santé discale."},
+      {id:"S07",nom:"Banane + pistaches",where:["tetouan","casablanca"],kcal:233,p:6,g:37,l:11,f:5,temps_min:1,faim_score:7,anti_inflam:2,
+       ingredients:[{nom:"Banane",qte:"1 (100g)"},{nom:"Pistaches",qte:"25g"}],
+       prep:["Prêt à manger. Manger les pistaches une à une, lentement."],
+       note:"Snack énergisant. Pistaches = acide gras oléique (comme l'huile d'olive). Pour les journées actives."},
+      {id:"S08",nom:"Ricotta + pomme + cannelle",where:["tetouan"],kcal:193,p:9,g:24,l:9,f:4,temps_min:3,faim_score:9,anti_inflam:2,tags:["caseine_lente","effet_dessert"],
+       ingredients:[{nom:"Ricotta Milky Food",qte:"60g"},{nom:"Pomme",qte:"1 (150g)"},{nom:"Cannelle",qte:"2g"}],
+       prep:["Mélanger ricotta + cannelle. Trancher la pomme, tremper dans la ricotta."],
+       note:"Caséine de la ricotta = digestion sur 5-6h. Le plus anti-fringale. Effet dessert qui coupe les envies de sucre du soir."}
+    ],
+    dinners_tetouan: [
+      {id:"TD01",nom:"Kefta au four + légumes rôtis courgette poivron",kcal:542,p:42,g:22,l:25,f:6,temps_min:40,faim_score:10,anti_inflam:4,
+       ingredients:[{nom:"Kefta bœuf 10%",qte:"175g"},{nom:"Courgette",qte:"200g"},{nom:"Poivron tricolore",qte:"200g"},{nom:"Oignon",qte:"100g"},{nom:"Perly 0% (sauce)",qte:"1 pot (125g)"},{nom:"Huile d'olive",qte:"1 c.c."},{nom:"Curcuma + cumin + poivre noir + sel",qte:"5g"}],
+       prep:["Four 200°C","KEFTA : mélanger avec oignon râpé + épices + sel. Former boulettes","LÉGUMES : courgette + poivron en cubes + huile + curcuma + poivre noir + sel","Plat four : légumes d'abord, kefta par dessus","Enfourner 30 min, remuer à mi-cuisson","SAUCE : Perly + ail pressé + persil + citron"],
+       note:"Curcuma dans les légumes rôtis = absorption maximale par les graisses de la kefta. Dîner complet en 5 min de préparation active."},
+      {id:"TD02",nom:"Cuisse de poulet four + haricots verts + carotte",kcal:504,p:61,g:20,l:20,f:7,temps_min:40,faim_score:9,anti_inflam:3,tags:["haute_proteine_max"],
+       ingredients:[{nom:"Cuisse de poulet sans peau",qte:"250g"},{nom:"Haricots verts",qte:"200g"},{nom:"Carotte",qte:"150g"},{nom:"Perly sauce ail",qte:"1 pot (125g)"},{nom:"Huile d'olive",qte:"1/2 c.c."}],
+       prep:["Four 200°C. Cuisse : curcuma + paprika + sel + huile 1/2 c.c.","Enfourner 35 min","Haricots verts + carotte : vapeur 8 min ou poêle avec ail + sel","Sauce : Perly + ail + citron + persil"],
+       note:"61g protéines au dîner = journée à 170-175g totaux. Légumes vapeur préservent les nutriments anti-inflammatoires."},
+      {id:"TD03",nom:"Shakshuka 3 œufs + mozzarella",kcal:530,p:31,g:30,l:28,f:7,temps_min:22,faim_score:10,anti_inflam:5,tags:["rapide","plaisir","anti_inflammatoire"],
+       ingredients:[{nom:"Œufs",qte:"3 œufs"},{nom:"Tomate (fraîche ou boîte)",qte:"400g"},{nom:"Poivron rouge",qte:"150g"},{nom:"Oignon",qte:"100g"},{nom:"Mozzarella Milky Food",qte:"40g"},{nom:"Toast complet",qte:"1 tranche (25g)"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Huile + oignon 4 min. Ajouter poivron 3 min","Tomates + paprika + cumin + sel. Mijoter 12 min","3 creux dans la sauce, casser 1 œuf dans chaque","Couvrir feu doux 5-7 min (blancs pris, jaune coulant)","Mozzarella déchirée par dessus, couvrir 1 min","Servir avec 1 toast"],
+       note:"Tomate cuite = lycopène x3 vs crue. Satisfait les envies de repas chaud sans trahir les macros."},
+      {id:"TD04",nom:"Thon + avocat + tomate + toast",kcal:497,p:44,g:30,l:18,f:11,temps_min:8,faim_score:8,anti_inflam:5,tags:["rapide","leger","omega3","anti_inflammatoire_max"],
+       ingredients:[{nom:"Thon boîte (eau)",qte:"2 boîtes (160g)"},{nom:"Avocat",qte:"1/2 (80g)"},{nom:"Tomate",qte:"200g"},{nom:"Concombre",qte:"100g"},{nom:"Toast complet",qte:"2 tranches (50g)"}],
+       prep:["Égoutter le thon, écraser légèrement à la fourchette","Couper avocat en tranches, tomate + concombre en dés","Assembler dans un bol : thon + avocat + légumes","Assaisonner : sel + citron + paprika","Manger avec toast en accompagnement"],
+       note:"DÎNER ANTI-INFLAMMATOIRE MAXIMAL. Oméga-3 + graisses saines = dose thérapeutique L5-S1. Idéal les jours de douleur élevée."},
+      {id:"TD05",nom:"Omelette 4 œufs légumes + Kroon",kcal:527,p:39,g:20,l:31,f:4,temps_min:15,faim_score:9,anti_inflam:2,tags:["rapide","low_carb"],
+       ingredients:[{nom:"Œufs",qte:"3 entiers + 2 blancs"},{nom:"Kroon rouge",qte:"40g"},{nom:"Poivron + oignon",qte:"150g"},{nom:"Tomate",qte:"100g"},{nom:"Huile d'olive",qte:"1 c.c."},{nom:"Toast complet",qte:"1 tranche (25g)"}],
+       prep:["Sauter poivron + oignon 4 min dans huile","Battre 3 œufs + 2 blancs + sel + poivre","Verser sur légumes feu doux","Quand semi-pris, déposer Kroon tranché sur une moitié","Plier, couvrir 2 min, Kroon fond","Servir avec tomate + 1 toast"],
+       note:"2 blancs en plus = +7g protéines sans graisses. Kroon = fromage le plus riche en protéines de ta liste."},
+      {id:"TD06",nom:"Saucisse de poulet + pâtes complètes + légumes",kcal:545,p:32,g:52,l:22,f:9,temps_min:25,faim_score:9,anti_inflam:2,tags:["plaisir","max_2x_semaine"],
+       ingredients:[{nom:"Saucisse de poulet",qte:"130g"},{nom:"Pâtes complètes",qte:"60g crues"},{nom:"Tomate + oignon + poivron",qte:"200g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Cuire pâtes eau bouillante salée","Couper saucisse en rondelles, cuire poêle sans huile 4 min","Ajouter légumes + sel + herbes 3 min","Mélanger pâtes égouttées + saucisse + légumes + 1 c.c. huile"],
+       note:"Saucisse MAX 2x par semaine (sel + graisses saturées). Pâtes complètes = 7g fibres sur ce repas."},
+      {id:"TD07",nom:"Ailes de poulet grillées + riz + haricots verts",kcal:553,p:46,g:42,l:19,f:5,temps_min:35,faim_score:9,anti_inflam:3,tags:["four","plaisir"],
+       ingredients:[{nom:"Ailes de poulet sans peau",qte:"180g"},{nom:"Riz blanc",qte:"45g cru"},{nom:"Haricots verts",qte:"150g"},{nom:"Huile d'olive",qte:"1/2 c.c."}],
+       prep:["Ailes : enlever la peau. Assaisonner paprika + ail + cumin + sel","Four 200°C 30 min, retourner à mi-cuisson","Riz : cuire classique","Haricots verts : vapeur 8 min, assaisonner ail + sel"],
+       note:"Enlever la peau AVANT cuisson = -100 kcal de graisses saturées. Haricots verts = magnésium qui aide la récupération du dos."}
+    ],
+    dinners_casablanca: [
+      {id:"CD01",nom:"Kefta poêle + 2 œufs frits + salade",lieu:"Maison Casa (bouteille gaz + poêle)",kcal:535,p:42,g:12,l:34,f:3,temps_min:15,faim_score:9,
+       portions:{kefta:"3-4 boulettes taille golf ≈ 140g",oeufs:"2 œufs dans la poêle"},
+       ingredients:[{nom:"Kefta (achetée chez boucher)",qte:"≈ 140g (3-4 boulettes)"},{nom:"Œufs frits",qte:"2 œufs"},{nom:"Tomate + concombre",qte:"200g"},{nom:"Huile d'olive",qte:"1 c.c."}],
+       prep:["Poêle feu moyen. Former les boulettes si non faites, cuire 5 min par face sans huile","Dans la même poêle : ajouter 1 c.c. huile, frire 2 œufs","Salade : tomate + concombre + sel + citron","Dresser dans une assiette"],
+       achat:"Acheter kefta chez le boucher en passant (déjà assaisonnée). Garder au frigo si acheté le soir même.",
+       note:"Dîner simple et complet en 15 min. 42g protéines. Pas de glucides = déficit comblé."},
+      {id:"CD02",nom:"Omelette 3 œufs + fromage fondu + toast",lieu:"Maison Casa",kcal:479,p:27,g:28,l:26,f:3,temps_min:10,faim_score:8,
+       portions:{oeufs:"3 œufs",fromage:"1-2 portions Milky Food",toast:"2 tranches pain de mie"},
+       ingredients:[{nom:"Œufs",qte:"3 œufs"},{nom:"Fromage fondu Milky",qte:"2 portions (40g)"},{nom:"Tomate",qte:"150g"},{nom:"Toast complet",qte:"2 tranches (50g)"}],
+       prep:["Battre 3 œufs + sel + poivre","Poêle feu doux, cuire omelette 3 min","Déposer fromage fondu sur une moitié, plier, couvrir 1 min","Servir avec tomate tranchée + toast"],
+       note:"Dîner express 10 min. Si fatigue extrême : ce repas sauve la journée. Toujours avoir œufs + fromage fondu à Casa."},
+      {id:"CD03",nom:"Pâtes complètes + thon + tomate",lieu:"Maison Casa",kcal:507,p:36,g:60,l:10,f:9,temps_min:18,faim_score:9,
+       portions:{pates:"1 grande poignée crue ≈ 80g",thon:"1 boîte standard"},
+       ingredients:[{nom:"Pâtes complètes",qte:"80g crues"},{nom:"Thon boîte (eau)",qte:"1 boîte (80g)"},{nom:"Tomate",qte:"200g"},{nom:"Ail + huile + sel",qte:"10g"},{nom:"Perly 0% (à côté)",qte:"1 pot (125g)"}],
+       prep:["Eau bouillante salée : cuire pâtes 10 min","Pendant ce temps : couper tomate en dés","Égoutter pâtes, remettre dans casserole","Ajouter thon égoutté + tomate + ail haché + huile + sel","Mélanger 2 min feu doux","Perly nature servi à côté"],
+       note:"Pâtes complètes = 7g fibres. Perly à côté = +7g protéines. Total 36g protéines pour un dîner maison rapide."},
+      {id:"CD04",nom:"Poulet ou kefta — snack bar (soir)",lieu:"Snack bar Casa",kcal:490,p:42,g:30,l:16,f:4,temps_min:0,faim_score:8,
+       portions:{viande:"portion restaurant standard",pain:"1 seul pain ou 1/2 pain"},
+       commande:"Poulet grillé + salade. OU kefta + salade. Éviter : frites, sauce blanche.",
+       strategie:["Commander en premier : eau 50cl","Attendre 5 min avec l'eau avant de manger = réduit la faim","Manger lentement, poser les couverts entre chaque bouchée","Stop au premier signe de satiété, même si l'assiette n'est pas finie"],
+       note:"Dîner d'urgence si épuisé. Meilleur que cuisiner mal ou commander une pizza."}
+    ]
   },
-  {
-    "breakfast": {
-      "name": "Oats Ricotta Cuisson + Orange",
-      "ingredients": [
-        "Flocons avoine 55g",
-        "Lait demi-ecreme 150ml",
-        "Ricotta Milky Food 60g",
-        "Orange 150g"
-      ],
-      "protein": 29,
-      "calories": 446,
-      "carbs": 48,
-      "fat": 13
-    },
-    "snack": {
-      "name": "2 Oeufs Durs + Fromage Fondu Milky",
-      "ingredients": [
-        "Oeufs durs 2 un.",
-        "Fromage fondu Milky 20g 2 un."
-      ],
-      "protein": 17,
-      "calories": 192,
-      "carbs": 4,
-      "fat": 13
-    },
-    "lunch": {
-      "name": "Kefta Boeuf Riz Sauce Yaourt Ail",
-      "ingredients": [
-        "Kefta boeuf 10pct 200g",
-        "Riz blanc cru 55g",
-        "Perly 0pct (sauce) 125g",
-        "Ail",
-        "Concombre + tomate (salade) 200g",
-        "Cumin + paprika + coriandre + sel 5g"
-      ],
-      "protein": 50,
-      "calories": 578,
-      "carbs": 45,
-      "fat": 20
-    },
-    "dinner": {
-      "name": "Kefta Boeuf Four + Legumes Rotis + Patate Douce",
-      "ingredients": [
-        "Kefta boeuf 10pct 180g",
-        "Patate douce 180g",
-        "Courgette 200g",
-        "Poivron rouge 150g",
-        "Oignon 100g",
-        "Huile olive 1 tsp",
-        "Curcuma + cumin + coriandre + poivre noir 6g"
-      ],
-      "protein": 44,
-      "calories": 553,
-      "carbs": 40,
-      "fat": 22
-    }
-  },
-  {
-    "breakfast": {
-      "name": "Pancakes Proteines Banane Avoine",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Oeufs entiers 2 un.",
-        "Banane bien mure 100g",
-        "Perly 0pct (pour servir) 125g",
-        "Cannelle + sel 3g"
-      ],
-      "protein": 28,
-      "calories": 442,
-      "carbs": 52,
-      "fat": 12
-    },
-    "snack": {
-      "name": "Ricotta + Pomme + Cannelle",
-      "ingredients": [
-        "Ricotta Milky Food 60g",
-        "Pomme 150g",
-        "Cannelle 2g"
-      ],
-      "protein": 8.5,
-      "calories": 193,
-      "carbs": 22,
-      "fat": 8
-    },
-    "lunch": {
-      "name": "Pates Completes Sauce Tomate Maison Poulet",
-      "ingredients": [
-        "Blanc poulet cru 200g",
-        "Pates completes crues 65g",
-        "Tomates fraiches ou boite 400g",
-        "Ail",
-        "Huile olive 1 tsp",
-        "Basilic + sel + sucre pincee 3g"
-      ],
-      "protein": 52,
-      "calories": 565,
-      "carbs": 52,
-      "fat": 14
-    },
-    "dinner": {
-      "name": "Omelette Geante 5 Oeufs Legumes + Fromage",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Blancs oeuf 3 un.",
-        "Kroon rouge 40g",
-        "Champignons 150g",
-        "Poivron 100g",
-        "Courgette rapee 100g",
-        "Huile olive 0.5 tsp"
-      ],
-      "protein": 42,
-      "calories": 542,
-      "carbs": 14,
-      "fat": 30
-    }
-  },
-  {
-    "breakfast": {
-      "name": "Pancakes Proteines Banane Avoine",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Oeufs entiers 2 un.",
-        "Banane bien mure 100g",
-        "Perly 0pct (pour servir) 125g",
-        "Cannelle + sel 3g"
-      ],
-      "protein": 28,
-      "calories": 442,
-      "carbs": 52,
-      "fat": 12
-    },
-    "snack": {
-      "name": "Ricotta + Pomme + Cannelle",
-      "ingredients": [
-        "Ricotta Milky Food 60g",
-        "Pomme 150g",
-        "Cannelle 2g"
-      ],
-      "protein": 8.5,
-      "calories": 193,
-      "carbs": 22,
-      "fat": 8
-    },
-    "lunch": {
-      "name": "Pates Completes Sauce Tomate Maison Poulet",
-      "ingredients": [
-        "Blanc poulet cru 200g",
-        "Pates completes crues 65g",
-        "Tomates fraiches ou boite 400g",
-        "Ail",
-        "Huile olive 1 tsp",
-        "Basilic + sel + sucre pincee 3g"
-      ],
-      "protein": 52,
-      "calories": 565,
-      "carbs": 52,
-      "fat": 14
-    },
-    "dinner": {
-      "name": "Shakshuka Diner 3 Oeufs Fromage",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Tomates fraiches ou boite concassee 500g",
-        "Poivron 150g",
-        "Oignon 100g",
-        "Mozzarella Milky Food 40g",
-        "Pain mie complet 1 tr.",
-        "Huile olive 1 tsp",
-        "Curcuma + paprika + piment + sel 5g"
-      ],
-      "protein": 36,
-      "calories": 542,
-      "carbs": 32,
-      "fat": 24
-    }
-  },
-  {
-    "breakfast": {
-      "name": "Oeufs Brouilles Kroon Rouge + Tomate",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Kroon rouge 30g",
-        "Pain mie complet 1 tr.",
-        "Tomate 150g",
-        "Concombre 100g",
-        "Huile olive 0.5 tsp"
-      ],
-      "protein": 33,
-      "calories": 445,
-      "carbs": 22,
-      "fat": 24
-    },
-    "snack": {
-      "name": "Perly 0pct + Amandes + Orange",
-      "ingredients": [
-        "Perly 0pct 1 un.",
-        "Amandes 20g",
-        "Orange 150g"
-      ],
-      "protein": 11,
-      "calories": 218,
-      "carbs": 22,
-      "fat": 10
-    },
-    "lunch": {
-      "name": "Boeuf Lanières Patate Douce + Legumes Sautes",
-      "ingredients": [
-        "Escalope boeuf 200g",
-        "Patate douce 200g",
-        "Poivron rouge + vert 200g",
-        "Oignon 80g",
-        "Huile olive 1 tsp",
-        "Gingembre + curcuma + poivre + sel 6g"
-      ],
-      "protein": 50,
-      "calories": 572,
-      "carbs": 44,
-      "fat": 18
-    },
-    "dinner": {
-      "name": "Poulet Four Cuisse + Choufleur Roti + Sauce Yaourt",
-      "ingredients": [
-        "Cuisse poulet sans peau 250g",
-        "Choufleur 350g",
-        "Perly 0pct (sauce) 125g",
-        "Ail + persil + citron (sauce) 15g",
-        "Huile olive 1 tsp",
-        "Curcuma + paprika + sel 5g"
-      ],
-      "protein": 48,
-      "calories": 548,
-      "carbs": 22,
-      "fat": 24
-    }
-  },
-  {
-    "breakfast": {
-      "name": "Omelette Mozzarella Champignons",
-      "ingredients": [
-        "Oeufs entiers 3 un.",
-        "Blancs oeuf 2 un.",
-        "Mozzarella Milky Food 40g",
-        "Champignons frais 150g",
-        "Tomate 150g",
-        "Pain mie complet 1 tr.",
-        "Huile olive 0.5 tsp"
-      ],
-      "protein": 36,
-      "calories": 452,
-      "carbs": 20,
-      "fat": 24
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Salade Nicoise Thon Oeuf Pates Completes",
-      "ingredients": [
-        "Thon boite eau 80g 2 un.",
-        "Oeufs durs 3 un.",
-        "Pates completes crues 60g",
-        "Mais boite 50g",
-        "Laitue 80g",
-        "Tomate 100g",
-        "Huile olive 1 tsp",
-        "Moutarde + vinaigre + sel 10g"
-      ],
-      "protein": 58,
-      "calories": 568,
-      "carbs": 42,
-      "fat": 16
-    },
-    "dinner": {
-      "name": "Poulet Four Cuisse + Choufleur Roti + Sauce Yaourt",
-      "ingredients": [
-        "Cuisse poulet sans peau 250g",
-        "Choufleur 350g",
-        "Perly 0pct (sauce) 125g",
-        "Ail + persil + citron (sauce) 15g",
-        "Huile olive 1 tsp",
-        "Curcuma + paprika + sel 5g"
-      ],
-      "protein": 48,
-      "calories": 548,
-      "carbs": 22,
-      "fat": 24
-    }
+  daily_plans: {
+    tetouan: [
+      {id:"TJ1",jour:"Lundi",theme:"Fondation protéines + curcuma",kcal_total:1752,p_total:166,
+       repas:[{heure:"09:00",type:"petit_dejeuner",id:"TB01"},{heure:"13:00",type:"dejeuner",id:"TL01"},{heure:"16:30",type:"snack",id:"S02"},{heure:"20:00",type:"diner",id:"TD01"}]},
+      {id:"TJ2",jour:"Mardi",theme:"Oméga-3 + avocat anti-inflammatoire",kcal_total:1768,p_total:174,
+       repas:[{heure:"09:00",type:"petit_dejeuner",id:"TB02"},{heure:"13:00",type:"dejeuner",id:"TL03"},{heure:"16:30",type:"snack",id:"S03"},{heure:"20:00",type:"diner",id:"TD04"}]},
+      {id:"TJ3",jour:"Mercredi",theme:"Volume + fibres",kcal_total:1786,p_total:172,
+       repas:[{heure:"09:00",type:"petit_dejeuner",id:"TB03"},{heure:"13:00",type:"dejeuner",id:"TL05"},{heure:"16:30",type:"snack",id:"S05"},{heure:"20:00",type:"diner",id:"TD03"}]},
+      {id:"TJ4",jour:"Jeudi",theme:"Haute protéine max",kcal_total:1777,p_total:179,
+       repas:[{heure:"09:00",type:"petit_dejeuner",id:"TB04"},{heure:"13:00",type:"dejeuner",id:"TL06"},{heure:"16:30",type:"snack",id:"S08"},{heure:"20:00",type:"diner",id:"TD02"}]},
+      {id:"TJ5",jour:"Vendredi",theme:"Plaisir contrôlé",kcal_total:1764,p_total:169,
+       repas:[{heure:"09:30",type:"petit_dejeuner",id:"TB05"},{heure:"13:00",type:"dejeuner",id:"TL07"},{heure:"17:00",type:"snack",id:"S04"},{heure:"20:30",type:"diner",id:"TD05"}]},
+      {id:"TJ6",jour:"Samedi",theme:"Récupération + batch cooking Casa",kcal_total:1779,p_total:170,
+       repas:[{heure:"10:00",type:"petit_dejeuner",id:"TB06"},{heure:"13:30",type:"dejeuner",id:"TL02"},{heure:"17:00",type:"snack",id:"S06"},{heure:"20:30",type:"diner",id:"TD07"}],
+       batch:"Préparer pour Casa pendant la matinée : 6 œufs durs, légumes lavés, fruits secs en sachet. Kefta achetée chez le boucher."},
+      {id:"TJ7",jour:"Dimanche",theme:"Légèreté avant départ",kcal_total:1757,p_total:168,
+       repas:[{heure:"10:00",type:"petit_dejeuner",id:"TB07"},{heure:"13:30",type:"dejeuner",id:"TL04"},{heure:"17:00",type:"snack",id:"S07"},{heure:"20:30",type:"diner",id:"TD06"}]}
+    ],
+    casablanca: [
+      {id:"CJ1",jour:"Jour 1 (arrivée)",theme:"Installation et routine",kcal_total:1668,p_total:160,
+       repas:[{heure:"07:30",type:"petit_dejeuner",id:"CB02",context:"Avant ou pendant le trajet. CB02 = meilleure option protéines."},{heure:"12:30",type:"dejeuner",id:"CL01",context:"Niçoise = choix N°1 au snack. Stable, connue."},{heure:"16:30",type:"snack",id:"S05",context:"Œufs durs préparés — amenés de Tétouan"},{heure:"20:00",type:"diner",id:"CD01",context:"Acheter kefta chez le boucher en rentrant. 15 min de cuisine."}],
+       alerte:"Ne pas acheter de croissant/viennoiserie en route. Les œufs durs dans le sac = assurance contre ce piège."},
+      {id:"CJ2",jour:"Jour 2",theme:"Routine établie",kcal_total:1698,p_total:162,
+       repas:[{heure:"07:30",type:"petit_dejeuner",id:"CB03"},{heure:"12:30",type:"dejeuner",id:"CL02"},{heure:"16:30",type:"snack",id:"S04",context:"Dattes + amandes dans le sac. Stop cravings sucre 16h."},{heure:"20:00",type:"diner",id:"CD02"}]},
+      {id:"CJ3",jour:"Jour 3",theme:"Variété snack bar",kcal_total:1629,p_total:167,
+       repas:[{heure:"07:30",type:"petit_dejeuner",id:"CB01"},{heure:"12:30",type:"dejeuner",id:"CL03"},{heure:"16:30",type:"snack",id:"S06",context:"Perly + pomme + cajou dans le sac ou chez l'épicier"},{heure:"20:00",type:"diner",id:"CD03"}]},
+      {id:"CJ4",jour:"Jour 4 (retour)",theme:"Finir + retour Tétouan",kcal_total:1710,p_total:158,
+       repas:[{heure:"07:30",type:"petit_dejeuner",id:"CB04"},{heure:"12:00",type:"dejeuner",id:"CL04",context:"Manger avant 12h30 si départ en début d'après-midi"},{heure:"15:30",type:"snack",id:"S07",context:"DANS LE TRANSPORT. Banane + pistaches dans le sac."},{heure:"20:30",type:"diner",id:"TD03",context:"Shakshuka = bienvenue à la maison. 20 min."}],
+       alerte:"Sac pour le trajet : banane + pistaches + eau 1.5L. Ignorer chips, jus, biscuits en station."}
+    ]
   }
-];
+};
 
-const MEALS_CASABLANCA = [
-  // Jour 0 (Dim) — 150P / 1746 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake + Pomme",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Eau fraiche 300ml",
-        "Pomme 150g"
-      ],
-      "protein": 25,
-      "calories": 198,
-      "carbs": 21,
-      "fat": 2
-    },
-    "lunch": {
-      "name": "Shawarma Poulet Complet (Fast Food)",
-      "ingredients": [
-        "Shawarma poulet pain complet 1 un.",
-        "Garniture (tomate, laitue, cornichon, oignon) 100g",
-        "Sauce blanche legere (demander peu) 15g"
-      ],
-      "protein": 42,
-      "calories": 560,
-      "carbs": 40,
-      "fat": 22
-    },
-    "dinner": {
-      "name": "Poulet Roti Rotisserie + Pain + Crudites",
-      "ingredients": [
-        "Poulet roti rotisserie sans peau 200g",
-        "Pain baguette 1/4 60g",
-        "Crudites (tomate, laitue) 100g"
-      ],
-      "protein": 48,
-      "calories": 540,
-      "carbs": 30,
-      "fat": 22
-    }
-  },
-  // Jour 1 (Lun) — 147P / 1798 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Sandwich Poulet Grille (Snack Bar)",
-      "ingredients": [
-        "Sandwich poulet grille complet 1 un.",
-        "Pain baguette, laitue, tomate, oignon",
-        "Sauce moutarde ou harissa legere 10g"
-      ],
-      "protein": 40,
-      "calories": 520,
-      "carbs": 36,
-      "fat": 18
-    },
-    "dinner": {
-      "name": "Sandwich Kefta Grille (Fast Food)",
-      "ingredients": [
-        "Sandwich kefta boeuf grille 1 un.",
-        "Pain rond, tomate, oignon, persil",
-        "Harissa ou moutarde 10g"
-      ],
-      "protein": 42,
-      "calories": 530,
-      "carbs": 32,
-      "fat": 24
-    }
-  },
-  // Jour 2 (Mar) — 142P / 1870 kcal
-  {
-    "breakfast": {
-      "name": "Oeufs Durs + Fromage + Pain (Epicerie)",
-      "ingredients": [
-        "Oeufs durs (epicerie) 3 un.",
-        "Fromage fondu Milky 20g 2 un.",
-        "Pain mie complet 2 tr.",
-        "Pomme 150g"
-      ],
-      "protein": 30,
-      "calories": 480,
-      "carbs": 38,
-      "fat": 20
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Tacos Poulet Grille Simple (Style O'Tacos)",
-      "ingredients": [
-        "Tacos poulet grille taille M 1 un.",
-        "Demander nature + harissa (sans sauce fromagere)",
-        "Salade (tomate, laitue) 60g"
-      ],
-      "protein": 40,
-      "calories": 560,
-      "carbs": 42,
-      "fat": 22
-    },
-    "dinner": {
-      "name": "Shawarma Poulet Complet (Fast Food)",
-      "ingredients": [
-        "Shawarma poulet pain complet 1 un.",
-        "Garniture (tomate, laitue, cornichon, oignon) 100g",
-        "Sauce blanche legere (demander peu) 15g"
-      ],
-      "protein": 42,
-      "calories": 530,
-      "carbs": 36,
-      "fat": 20
-    }
-  },
-  // Jour 3 (Mer) — 151P / 1808 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Poulet Roti Rotisserie + Pain + Crudites",
-      "ingredients": [
-        "Poulet roti rotisserie sans peau 200g",
-        "Pain baguette 1/4 60g",
-        "Crudites (tomate, laitue) 100g"
-      ],
-      "protein": 48,
-      "calories": 540,
-      "carbs": 30,
-      "fat": 22
-    },
-    "dinner": {
-      "name": "Burger Poulet Grille sans Frites (Fast Food)",
-      "ingredients": [
-        "Burger poulet grille simple 1 un.",
-        "Salade (tomate, laitue, oignon) 80g",
-        "Sans frites, sans mayo"
-      ],
-      "protein": 38,
-      "calories": 520,
-      "carbs": 38,
-      "fat": 22
-    }
-  },
-  // Jour 4 (Jeu) — 150P / 1716 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake + Pomme",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Eau fraiche 300ml",
-        "Pomme 150g"
-      ],
-      "protein": 25,
-      "calories": 198,
-      "carbs": 21,
-      "fat": 2
-    },
-    "lunch": {
-      "name": "Sandwich Kefta Grille (Fast Food)",
-      "ingredients": [
-        "Sandwich kefta boeuf grille 1 un.",
-        "Pain rond, tomate, oignon, persil",
-        "Harissa ou moutarde 10g"
-      ],
-      "protein": 42,
-      "calories": 530,
-      "carbs": 32,
-      "fat": 24
-    },
-    "dinner": {
-      "name": "Poulet Roti Rotisserie + Pain + Crudites",
-      "ingredients": [
-        "Poulet roti rotisserie sans peau 200g",
-        "Pain baguette 1/4 60g",
-        "Crudites (tomate, laitue) 100g"
-      ],
-      "protein": 48,
-      "calories": 540,
-      "carbs": 30,
-      "fat": 22
-    }
-  },
-  // Jour 5 (Ven) — 147P / 1828 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Shawarma Poulet Complet (Fast Food)",
-      "ingredients": [
-        "Shawarma poulet pain complet 1 un.",
-        "Garniture (tomate, laitue, cornichon, oignon) 100g",
-        "Sauce blanche legere (demander peu) 15g"
-      ],
-      "protein": 42,
-      "calories": 560,
-      "carbs": 40,
-      "fat": 22
-    },
-    "dinner": {
-      "name": "Sandwich Poulet Grille (Snack Bar)",
-      "ingredients": [
-        "Sandwich poulet grille complet 1 un.",
-        "Pain baguette, laitue, tomate, oignon",
-        "Sauce moutarde ou harissa legere 10g"
-      ],
-      "protein": 40,
-      "calories": 520,
-      "carbs": 36,
-      "fat": 18
-    }
-  },
-  // Jour 6 (Sam) — 145P / 1808 kcal
-  {
-    "breakfast": {
-      "name": "Oats Whey Vanille + Banane",
-      "ingredients": [
-        "Flocons avoine 60g",
-        "Lait demi-ecreme 200ml",
-        "Whey 1 scoop 30g",
-        "Banane 100g",
-        "Cannelle poudre 2g"
-      ],
-      "protein": 35,
-      "calories": 448,
-      "carbs": 55,
-      "fat": 9
-    },
-    "snack": {
-      "name": "Whey Shake Lait + Banane",
-      "ingredients": [
-        "Whey 1 scoop 30g",
-        "Lait demi-ecreme 200ml",
-        "Banane 100g"
-      ],
-      "protein": 30,
-      "calories": 300,
-      "carbs": 38,
-      "fat": 5
-    },
-    "lunch": {
-      "name": "Burger Poulet Grille sans Frites (Fast Food)",
-      "ingredients": [
-        "Burger poulet grille simple 1 un.",
-        "Salade (tomate, laitue, oignon) 80g",
-        "Sans frites, sans mayo"
-      ],
-      "protein": 38,
-      "calories": 520,
-      "carbs": 38,
-      "fat": 22
-    },
-    "dinner": {
-      "name": "Shawarma Poulet Complet + Orange",
-      "ingredients": [
-        "Shawarma poulet pain complet 1 un.",
-        "Garniture standard (tomate, laitue, cornichon) 80g",
-        "Orange 150g"
-      ],
-      "protein": 42,
-      "calories": 540,
-      "carbs": 42,
-      "fat": 20
-    }
+const MEAL_INDEX = {};
+['breakfasts_tetouan','breakfasts_casablanca','lunches_tetouan','lunches_casablanca','snacks','dinners_tetouan','dinners_casablanca']
+  .forEach(cat => MEAL_DB.meals[cat].forEach(m => { MEAL_INDEX[m.id] = m; }));
+
+const TYPE_KEY = { petit_dejeuner:'breakfast', dejeuner:'lunch', snack:'snack', diner:'dinner' };
+const TYPE_LABEL = { breakfast:'Petit-déj', lunch:'Déjeuner', snack:'Collation', dinner:'Dîner' };
+const TYPE_ICON = { breakfast:'sunrise', lunch:'utensils', snack:'cookie', dinner:'moon' };
+
+function getTodayPlan() {
+  const dow = new Date().getDay();
+  if (getTodayMode() === 'casablanca') {
+    const days = (state.settings.casablancaDays || []).slice().sort();
+    const i = days.indexOf(dow);
+    const idx = i >= 0 ? Math.min(i, MEAL_DB.daily_plans.casablanca.length - 1) : 0;
+    return MEAL_DB.daily_plans.casablanca[idx];
   }
-];
-
+  return MEAL_DB.daily_plans.tetouan[(dow + 6) % 7];
+}
 const PHYSIO_EXERCISES = [
   { id:'pelvic_tilt', name:"Bascule du bassin", reps:"15 reps", detail:"Allongé sur le dos, genoux pliés, pieds à plat. Aplatis le bas du dos contre le sol en contractant les abdos. Tiens 3 secondes, relâche. Mouvement doux, sans à-coups." },
   { id:'glute_bridge', name:"Pont fessier", reps:"3 × 15 reps", detail:"Allongé sur le dos, genoux pliés. Soulève les hanches en serrant les fessiers, sans cambrer. Le corps forme une ligne droite épaules-genoux. Descends lentement." },
@@ -2084,7 +1554,7 @@ const PHYSIO_EXERCISES = [
   { id:'child_pose', name:"Posture de l'enfant", reps:"3 × 30 sec", detail:"À genoux, fesses sur les talons, bras tendus devant, front au sol. Respire profondément. Étirement passif du bas du dos." }
 ];
 
-const DEFAULT_TARGETS = { calories:1800, protein:150, carbs:170, fat:65, water:10, walking:30, weightStart:93, weightGoal:78 };
+const DEFAULT_TARGETS = { calories:1800, protein:175, carbs:145, fat:60, water:10, walking:30, weightStart:95, weightGoal:80 };
 let TARGETS = { ...DEFAULT_TARGETS };
 const STORAGE_KEY = 'regime_state_v1';
 
@@ -2093,7 +1563,7 @@ const STORAGE_KEY = 'regime_state_v1';
  * ============================================================ */
 const defaultState = () => ({
   settings: {
-    casablancaDays:[1,2,3],
+    casablancaDays:[1,2,3,4],
     theme:'light',
     notifPermitted:false,
     dietStartDate: null,
@@ -2170,8 +1640,14 @@ function getTodayMode() {
   return state.settings.casablancaDays.includes(dow) ? 'casablanca' : 'tetouan';
 }
 function getMealsForToday() {
-  const dow = new Date().getDay();
-  return getTodayMode() === 'casablanca' ? MEALS_CASABLANCA[dow] : MEALS_TETOUAN[dow];
+  const plan = getTodayPlan();
+  const out = { breakfast:null, snack:null, lunch:null, dinner:null };
+  plan.repas.forEach(r => {
+    const k = TYPE_KEY[r.type] || r.type;
+    const meal = MEAL_INDEX[r.id];
+    if (meal) out[k] = Object.assign({}, meal, { _heure:r.heure, _context:r.context });
+  });
+  return out;
 }
 
 /* ============================================================
@@ -2228,18 +1704,20 @@ function renderToday() {
   ];
   $('#today-meals').innerHTML = mealOrder.map(m => {
     const meal = meals[m.key];
+    if (!meal) return '';
     const checked = mealState[m.key];
+    const heure = meal._heure ? `<span class="meal-time">${meal._heure}</span>` : '';
     return `
       <div class="meal ${checked ? 'completed':''}" data-meal-key="${m.key}">
         <div class="meal-icon"><i data-lucide="${m.icon}"></i></div>
         <div class="meal-body">
-          <div class="meal-type">${m.label}</div>
-          <div class="meal-name">${meal.name}</div>
+          <div class="meal-type">${m.label} ${heure}</div>
+          <div class="meal-name">${meal.nom}</div>
           <div class="macros-row">
-            <span class="pill">${meal.calories} kcal</span>
-            <span class="pill green">${meal.protein}g prot</span>
-            <span class="pill orange">${meal.carbs}g gluc</span>
-            <span class="pill blue">${meal.fat}g lip</span>
+            <span class="pill">${meal.kcal} kcal</span>
+            <span class="pill green">${meal.p}g prot</span>
+            <span class="pill orange">${meal.g}g gluc</span>
+            <span class="pill blue">${meal.l}g lip</span>
           </div>
         </div>
         <div class="meal-check ${checked ? 'checked':''}" data-toggle="${m.key}">
@@ -2307,76 +1785,122 @@ function renderToday() {
  * ============================================================ */
 function renderMealPlan() {
   const mode = getTodayMode();
-  const data = mode === 'casablanca' ? MEALS_CASABLANCA : MEALS_TETOUAN;
+  const plans = MEAL_DB.daily_plans[mode];
+  const todayPlanId = getTodayPlan().id;
   $('#plan-mode-banner').innerHTML = `
     <div class="mode-banner ${mode}">
       <i data-lucide="${mode === 'tetouan' ? 'home' : 'building-2'}"></i>
       <div style="flex:1;">
         <div class="label">Plan affiché</div>
-        <div class="value">${mode === 'tetouan' ? 'Plan Tétouan' : 'Plan Casablanca'}</div>
+        <div class="value">${mode === 'tetouan' ? 'Plan Tétouan · maison' : 'Plan Casablanca · 4 jours'}</div>
       </div>
     </div>`;
 
-  const todayDow = new Date().getDay();
-  $('#plan-days').innerHTML = data.map((day, idx) => {
-    const totals = ['breakfast','snack','lunch','dinner'].reduce((acc, k) => ({
-      calories: acc.calories + day[k].calories,
-      protein: acc.protein + day[k].protein,
-      carbs: acc.carbs + day[k].carbs,
-      fat: acc.fat + day[k].fat
-    }), {calories:0,protein:0,carbs:0,fat:0});
-    const isToday = idx === todayDow;
+  $('#plan-days').innerHTML = plans.map(plan => {
+    const totals = plan.repas.reduce((acc, r) => {
+      const m = MEAL_INDEX[r.id]; if (!m) return acc;
+      return { kcal:acc.kcal+m.kcal, p:acc.p+m.p, g:acc.g+m.g, l:acc.l+m.l };
+    }, {kcal:0,p:0,g:0,l:0});
+    const isToday = plan.id === todayPlanId;
     return `
       <div class="day-card">
         <div class="day-card-header">
-          <div class="day-name">${DAYS_FR[idx]} ${isToday ? '<span class="pill green">Aujourd\'hui</span>' : ''}</div>
+          <div>
+            <div class="day-name">${plan.jour} ${isToday ? '<span class="pill green">Aujourd\'hui</span>' : ''}</div>
+            <div class="muted" style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.14em;margin-top:2px;">${plan.theme || ''}</div>
+          </div>
         </div>
         <div class="day-meals">
-          ${[
-            ['breakfast','Petit-déj'],['snack','Collation'],
-            ['lunch','Déjeuner'],['dinner','Dîner']
-          ].map(([k,label]) => `
-            <div class="day-meal-row" data-day="${idx}" data-meal="${k}" data-mode="${mode}">
-              <div class="day-meal-type">${label}</div>
-              <div class="day-meal-name">${day[k].name}</div>
-              <div class="day-meal-kcal">${day[k].calories} kcal</div>
-            </div>`).join('')}
+          ${plan.repas.map(r => {
+            const m = MEAL_INDEX[r.id]; if (!m) return '';
+            return `
+            <div class="day-meal-row" data-meal-id="${r.id}" data-label="${TYPE_LABEL[TYPE_KEY[r.type]] || r.type}">
+              <div class="day-meal-type">${r.heure || TYPE_LABEL[TYPE_KEY[r.type]]}</div>
+              <div class="day-meal-name">${m.nom}</div>
+              <div class="day-meal-kcal">${m.kcal} kcal</div>
+            </div>`;
+          }).join('')}
         </div>
         <div class="day-totals">
-          <span class="pill">${totals.calories} kcal</span>
-          <span class="pill green">${totals.protein}g prot</span>
-          <span class="pill orange">${totals.carbs}g gluc</span>
-          <span class="pill blue">${totals.fat}g lip</span>
+          <span class="pill">${totals.kcal} kcal</span>
+          <span class="pill green">${totals.p}g prot</span>
+          <span class="pill orange">${totals.g}g gluc</span>
+          <span class="pill blue">${totals.l}g lip</span>
         </div>
+        ${plan.batch ? `<div class="muted" style="margin-top:8px;font-size:12px;line-height:1.4;font-style:italic;">📦 ${plan.batch}</div>` : ''}
+        ${plan.alerte ? `<div class="muted" style="margin-top:8px;font-size:12px;line-height:1.4;color:var(--orange);">⚠ ${plan.alerte}</div>` : ''}
       </div>`;
   }).join('');
 
   $$('.day-meal-row').forEach(row => {
     row.addEventListener('click', () => {
-      const day = parseInt(row.dataset.day);
-      const k = row.dataset.meal;
-      const m = row.dataset.mode === 'casablanca' ? MEALS_CASABLANCA : MEALS_TETOUAN;
-      const labels = {breakfast:'Petit-déj', snack:'Collation', lunch:'Déjeuner', dinner:'Dîner'};
-      openRecipe(m[day][k], labels[k] + ' · ' + DAYS_FR[day]);
+      const meal = MEAL_INDEX[row.dataset.mealId];
+      if (meal) openRecipe(meal, row.dataset.label);
     });
   });
   refreshIcons();
 }
 
 function openRecipe(meal, title) {
+  const tags = [];
+  if (meal.temps_min) tags.push(`<span class="pill">${meal.temps_min} min</span>`);
+  if (meal.faim_score) tags.push(`<span class="pill green">faim ${meal.faim_score}/10</span>`);
+  if (meal.anti_inflam) tags.push(`<span class="pill orange">anti-inflam ${meal.anti_inflam}/5</span>`);
+  if (meal.lieu) tags.push(`<span class="pill blue">${meal.lieu}</span>`);
+
+  const ingHtml = (meal.ingredients || []).map(i =>
+    typeof i === 'string' ? `<li>${i}</li>` : `<li><strong>${i.qte}</strong> — ${i.nom}</li>`
+  ).join('');
+
+  const sections = [];
+  if (meal.portions) {
+    sections.push(`<div class="section-title"><i data-lucide="ruler"></i> Repères visuels</div>
+      <ul style="padding-left:20px;line-height:1.8;font-size:13.5px;">
+        ${Object.entries(meal.portions).map(([k,v]) => `<li><strong>${k}</strong> : ${v}</li>`).join('')}
+      </ul>`);
+  }
+  if (meal.commande) {
+    sections.push(`<div class="section-title"><i data-lucide="message-square"></i> Commande</div>
+      <p style="font-size:14px;line-height:1.55;margin-bottom:8px;">${meal.commande}</p>`);
+  }
+  if (meal.prep && meal.prep.length) {
+    sections.push(`<div class="section-title"><i data-lucide="chef-hat"></i> Préparation</div>
+      <ol style="padding-left:22px;line-height:1.65;font-size:13.5px;">
+        ${meal.prep.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
+      </ol>`);
+  }
+  if (meal.strategie && meal.strategie.length) {
+    sections.push(`<div class="section-title"><i data-lucide="target"></i> Stratégie</div>
+      <ul style="padding-left:20px;line-height:1.6;font-size:13.5px;">
+        ${meal.strategie.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('')}
+      </ul>`);
+  }
+  if (meal.boost) {
+    sections.push(`<p style="font-size:13px;color:var(--green);margin-top:8px;"><strong>Boost :</strong> ${meal.boost}</p>`);
+  }
+  if (meal.achat) {
+    sections.push(`<p style="font-size:13px;color:var(--muted);margin-top:8px;"><strong>Achat :</strong> ${meal.achat}</p>`);
+  }
+  if (meal.note) {
+    sections.push(`<div style="margin-top:14px;padding:12px;background:var(--surface-2);border-left:3px solid var(--green);font-family:var(--display);font-style:italic;font-size:14.5px;line-height:1.5;">${meal.note}</div>`);
+  }
+  if (meal._context) {
+    sections.push(`<div style="margin-top:10px;padding:10px;border:1px dashed var(--border);font-size:13px;color:var(--muted);line-height:1.5;">💡 ${meal._context}</div>`);
+  }
+
   $('#recipe-content').innerHTML = `
-    <h3 style="margin-bottom:8px;">${title}</h3>
-    <div style="font-size:16px;font-weight:500;margin-bottom:14px;">${meal.name}</div>
-    <div class="macros-row" style="margin-bottom:16px;">
-      <span class="pill">${meal.calories} kcal</span>
-      <span class="pill green">${meal.protein}g prot</span>
-      <span class="pill orange">${meal.carbs}g gluc</span>
-      <span class="pill blue">${meal.fat}g lip</span>
+    <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--muted);margin-bottom:4px;">${title}</div>
+    <h3 style="margin-bottom:10px;">${meal.nom}</h3>
+    <div class="macros-row" style="margin-bottom:8px;">
+      <span class="pill">${meal.kcal} kcal</span>
+      <span class="pill green">${meal.p}g prot</span>
+      <span class="pill orange">${meal.g}g gluc</span>
+      <span class="pill blue">${meal.l}g lip</span>
     </div>
+    <div class="macros-row" style="margin-bottom:14px;">${tags.join('')}</div>
     <div class="section-title"><i data-lucide="list"></i> Ingrédients</div>
-    <ul style="padding-left:18px;line-height:1.9;font-size:13px;color:var(--text-secondary);">
-      ${meal.ingredients.map(i => `<li>${i}</li>`).join('')}
-    </ul>`;
+    <ul style="padding-left:20px;line-height:1.7;font-size:13.5px;margin-bottom:14px;">${ingHtml}</ul>
+    ${sections.join('')}`;
   $('#recipe-modal').classList.add('show');
   refreshIcons();
 }
@@ -2593,11 +2117,11 @@ function todayMacros() {
   const ms = state.meals[tk] || {};
   const out = {calories:0, protein:0, carbs:0, fat:0};
   ['breakfast','snack','lunch','dinner'].forEach(k => {
-    if (ms[k]) {
-      out.calories += meals[k].calories;
-      out.protein += meals[k].protein;
-      out.carbs += meals[k].carbs;
-      out.fat += meals[k].fat;
+    if (ms[k] && meals[k]) {
+      out.calories += meals[k].kcal;
+      out.protein += meals[k].p;
+      out.carbs += meals[k].g;
+      out.fat += meals[k].l;
     }
   });
   return out;
@@ -2663,11 +2187,21 @@ function renderNutrition() {
   last7.forEach(k => {
     const dow = new Date(k).getDay();
     const inCasa = state.settings.casablancaDays.includes(dow);
-    const day = (inCasa ? MEALS_CASABLANCA : MEALS_TETOUAN)[dow];
+    let plan;
+    if (inCasa) {
+      const days = state.settings.casablancaDays.slice().sort();
+      const i = days.indexOf(dow);
+      plan = MEAL_DB.daily_plans.casablanca[Math.min(Math.max(i,0), MEAL_DB.daily_plans.casablanca.length - 1)];
+    } else {
+      plan = MEAL_DB.daily_plans.tetouan[(dow + 6) % 7];
+    }
+    const dayMeals = {};
+    plan.repas.forEach(r => { dayMeals[TYPE_KEY[r.type] || r.type] = MEAL_INDEX[r.id]; });
     const ms = state.meals[k] || {};
     let dayCal=0, dayProt=0, dayCarb=0, dayFat=0;
     ['breakfast','snack','lunch','dinner'].forEach(x => {
-      if (ms[x]) { dayCal+=day[x].calories; dayProt+=day[x].protein; dayCarb+=day[x].carbs; dayFat+=day[x].fat; }
+      const m = dayMeals[x];
+      if (ms[x] && m) { dayCal+=m.kcal; dayProt+=m.p; dayCarb+=m.g; dayFat+=m.l; }
     });
     [
       [dayCal, TARGETS.calories], [dayProt, TARGETS.protein],
